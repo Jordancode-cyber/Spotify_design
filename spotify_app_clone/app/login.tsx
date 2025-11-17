@@ -13,15 +13,18 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { ImageBackground } from 'expo-image';
 
 
 const spotifylogo1 = require('../assets/images/Spotify_Full_Logo_RGB_Green.png');
+  
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const router = useRouter();
+
 
   function handleLogin() {
     // Placeholder: handle auth here (no navigation)
@@ -30,8 +33,15 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
+      
+      <ImageBackground source={require('../assets/images/my-fav-songs.jpg')} 
+        style={styles.absoluteFill} >
+        <View style={styles.overlay}>
+        </View>
+      </ImageBackground>
+      
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.flex}
@@ -39,6 +49,7 @@ export default function Login() {
         <TouchableOpacity style={styles.back} onPress={() => router.push('/')}>
           <Text style={styles.backText}>‹</Text>
         </TouchableOpacity>
+
 
         <View style={styles.header}>
           <Image source={spotifylogo1} style={styles.logo} />
@@ -82,7 +93,7 @@ export default function Login() {
 
           <View style={styles.linksRow}>
             <Text style={styles.linkText}>Don’t have an account? </Text>
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={() => router.push('/signup')}>
               <Text style={[styles.linkText, styles.linkBold]}>SIGN UP</Text>
             </TouchableOpacity>
           </View>
@@ -102,6 +113,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  absoluteFill: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.90)',
   },
   back: {
     position: 'absolute',
