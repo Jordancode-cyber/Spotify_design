@@ -1,15 +1,18 @@
 import React from 'react';
 import { StyleSheet, View, Image, Text, TouchableOpacity, ImageBackground, SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 
 const spotifylogo = require('../assets/images/Spotify_Primary_Logo_RGB_Green.png');
 
 export default function SignUp() {
+    const router = useRouter();
+
     return (
     <SafeAreaView style={styles.container}>
         <StatusBar style="light" hidden={true} />
             <View style={styles.container}>
-        <ImageBackground source={require('../assets/images/my-fav-songs.jpg')} 
+        <ImageBackground source={require('../assets/images/my-fav-songs.jpg')}
                 style={styles.absoluteFill} >
         <View style={styles.overlay}>
         </View>
@@ -23,7 +26,10 @@ export default function SignUp() {
             Free on Spotify
         </Text>
         
-    <TouchableOpacity style={styles.signUpPrimary}>
+    <TouchableOpacity 
+        style={styles.signUpPrimary}
+        onPress={() => router.push('/signupformpage')}
+    >
         <Text style={styles.signUpPrimaryText}>Sign Up Free</Text>
     </TouchableOpacity>
 

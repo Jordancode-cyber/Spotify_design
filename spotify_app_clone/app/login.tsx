@@ -11,9 +11,11 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ImageBackground } from 'expo-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const spotifylogo1 = require('../assets/images/Spotify_Full_Logo_RGB_Green.png');
@@ -23,12 +25,55 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
 
-  function handleLogin() {
-    // Placeholder: handle auth here (no navigation)
-    console.log('Log in pressed', { email, password, remember });
+  async function handleLogin() {
+    setError(null);
+    if (!email || !password) {
+      setError('Please enter email and password');
+      return;
+    }
+    try {
+      setLoading(true);
+      
+      // Call backend login API
+      const response = await fetch('http://192.168.1.13:3000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'Success') {
+        // Save user token and full user data
+        const token = 'token-' + Date.now();
+        await AsyncStorage.setItem('userToken', token);
+        
+        // Save complete user data from backend
+        const user = {
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone,
+        };
+        await AsyncStorage.setItem('user', JSON.stringify(user));
+        
+        // Navigate to dashboard
+        router.replace('/dashboard');
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Connection error. Please check if backend is running.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -36,7 +81,7 @@ export default function Login() {
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       
-      <ImageBackground source={require('../assets/images/my-fav-songs.jpg')} 
+      <ImageBackground source={require('../assets/images/my-fav-songs.jpg')}
         style={styles.absoluteFill} >
         <View style={styles.overlay}>
         </View>
@@ -61,7 +106,7 @@ export default function Login() {
         <View style={styles.form}>
           <View style={styles.inputRow}>
             <TextInput
-              placeholder="Email or username"
+              placeholder="Email"
               placeholderTextColor="#aaa"
               value={email}
               onChangeText={setEmail}
@@ -87,9 +132,17 @@ export default function Login() {
             <Switch value={remember} onValueChange={setRemember} trackColor={{ true: '#1DB954' }} />
           </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.85}>
-            <Text style={styles.loginButtonText}>LOG IN</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.85} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text style={styles.loginButtonText}>LOG IN</Text>
+            )}
           </TouchableOpacity>
+
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : null}
 
           <View style={styles.linksRow}>
             <Text style={styles.linkText}>Don’t have an account? </Text>
@@ -101,7 +154,18 @@ export default function Login() {
           <TouchableOpacity style={styles.resetRow} onPress={() => {}}>
             <Text style={styles.resetText}>RESET PASSWORD</Text>
           </TouchableOpacity>
+
+          {/* Temporary: quick link to dashboard for testing */}
+          <TouchableOpacity
+            style={styles.tempButton}
+            onPress={() => router.push('/dashboard')}
+            accessibilityRole="button"
+            accessibilityLabel="Go to dashboard temporary"
+          >
+            <Text style={styles.tempButtonText}>Go to Dashboard (temp)</Text>
+          </TouchableOpacity>
         </View>
+          {/* Temporary button ends here */}
 
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -181,4 +245,13 @@ const styles = StyleSheet.create({
   linkBold: { textDecorationLine: 'underline', fontWeight: '700', marginLeft: 10 },
   resetRow: { marginTop: 22 },
   resetText: { color: '#fff', textDecorationLine: 'underline', fontWeight: '700' },
+  errorText: { color: '#ff6b6b', marginTop: 10, fontWeight: '700' },
+  tempButton: {
+    marginTop: 16,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+  },
+  tempButtonText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
 });
