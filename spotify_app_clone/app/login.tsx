@@ -40,7 +40,7 @@ export default function Login() {
       setLoading(true);
       
       // Call backend login API
-      const response = await fetch('http://192.168.1.13:3000/login', {
+      const response = await fetch('http://192.168.1.15:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,21 +151,10 @@ export default function Login() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.resetRow} onPress={() => {}}>
+          <TouchableOpacity style={styles.resetRow} onPress={() => router.push('/resetpassword')}>
             <Text style={styles.resetText}>RESET PASSWORD</Text>
           </TouchableOpacity>
-
-          {/* Temporary: quick link to dashboard for testing */}
-          <TouchableOpacity
-            style={styles.tempButton}
-            onPress={() => router.push('/dashboard')}
-            accessibilityRole="button"
-            accessibilityLabel="Go to dashboard temporary"
-          >
-            <Text style={styles.tempButtonText}>Go to Dashboard (temp)</Text>
-          </TouchableOpacity>
         </View>
-          {/* Temporary button ends here */}
 
       </KeyboardAvoidingView>
     </SafeAreaView>

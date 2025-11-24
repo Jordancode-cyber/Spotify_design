@@ -142,6 +142,70 @@ app.post('/login', (req, res) => {
   });
 });
 
+// CHECK EMAIL ROUTE (for password reset)
+app.post('/check-email', (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  const sql = 'SELECT id FROM users WHERE email = ?';
+  
+  db.query(sql, [email], (err, data) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    if (data.length > 0) {
+      return res.status(200).json({ exists: true, message: 'Email found' });
+    } else {
+      return res.status(404).json({ exists: false, message: 'Email not found' });
+    }
+  });
+});
+
+// RESET PASSWORD ROUTE
+app.post('/reset-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ message: 'Email and new password are required' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters' });
+  }
+
+  try {
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password in database
+    const sql = 'UPDATE users SET password = ? WHERE email = ?';
+    
+    db.query(sql, [hashedPassword, email], (err, result) => {
+      if (err) {
+        console.error('Update error:', err);
+        return res.status(500).json({ message: 'Failed to update password' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      return res.status(200).json({ 
+        status: 'Success',
+        message: 'Password updated successfully'
+      });
+    });
+  } catch (hashError) {
+    console.error('Hashing error:', hashError);
+    return res.status(500).json({ message: 'Error processing password' });
+  }
+});
+
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {

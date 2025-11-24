@@ -76,8 +76,8 @@ export default function SignUpFormPage() {
 
     try {
       // Using your computer's IP address for Expo to connect to backend
-      // IP: 192.168.1.13 (your local network address)
-      const response = await fetch('http://192.168.1.13:3000/register', {
+      // IP: 192.168.1.15 (your local network address)
+      const response = await fetch('http://192.168.1.15:3000/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
